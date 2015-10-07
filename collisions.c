@@ -33,14 +33,14 @@ int cube_cube_intersection(
 
 int point_cube_intersection(
     Vec3D point,            /*point*/
-    Vec3D box, Vec3D size)  /*cube*/
+    Cube cube)				/*cube*/
 {
-    if ((point.x < box.x) ||
-        (point.y < box.y) ||
-        (point.z < box.z) ||
-        (point.x > box.x + size.x) ||
-        (point.y > box.y + size.y) ||
-        (point.z > box.z + size.z))
+    if ((point.x < cube.x) ||
+        (point.y < cube.y) ||
+        (point.z < cube.z) ||
+        (point.x > cube.h) ||
+        (point.y > cube.w) ||
+        (point.z > cube.d))
     {
         return 0;
     }

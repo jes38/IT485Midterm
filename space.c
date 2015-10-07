@@ -112,11 +112,12 @@ static void space_update(Space *space)
 
 void space_do_step(Space *space)
 {
-    if (!space)return;
+    GList *it;
+	
+	if (!space)return;
     if (space->stepstaken == space->steps)
     {
         space->stepstaken = 0;
-        GList *it;
         for (it = space->bodylist;it != NULL;it = g_list_next(it))
         {
             if (!it->data)continue;

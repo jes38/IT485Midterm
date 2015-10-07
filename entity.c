@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "entity.h"
 #include "simple_logger.h"
 

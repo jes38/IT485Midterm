@@ -16,9 +16,12 @@ typedef struct Entity_S
     Vec3D rotation;
     Vec3D scale;
     Vec4D color;
+
     Obj *objModel;
     Sprite *texture;    /**<object texture*/
     Body body;
+
+	struct Entity_S *parent;
 }Entity;
 
 /**

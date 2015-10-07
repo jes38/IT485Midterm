@@ -12,8 +12,7 @@ typedef struct
 #define cube_set(cube,a,b,c,l,m,n) (cube.x=a,cube.y=b,cube.z=c,\
                                     cube.w=l,cube.h=m,cube.d=n)
 
-int cube_cube_intersection(
-    Cube a,
-    Cube b);
+int cube_cube_intersection(Cube a, Cube b);
+int point_cube_intersection(Vec3D point, Cube cube);
 
 #endif
