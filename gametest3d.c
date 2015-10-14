@@ -18,6 +18,10 @@
  *    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *    SOFTWARE.
  */
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
 #include "mgl_callback.h"
 #include "simple_logger.h"
 #include "graphics3d.h"
@@ -27,6 +31,7 @@
 #include "sprite.h"
 #include "entity.h"
 #include "space.h"
+#include "ship.h"
 
 void set_camera(Vec3D position, Vec3D rotation);
 
@@ -74,6 +79,9 @@ int main(int argc, char *argv[])
     SDL_Event e;
     Obj *bgobj;
     Sprite *bgtext;
+
+	//my variables
+	Vec3D startingSpawn;
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -97,6 +105,17 @@ int main(int argc, char *argv[])
     
     space_add_body(space,&cube1->body);
     space_add_body(space,&cube2->body);
+
+	//my variables
+	numShips = 0;
+	shipVel = 0;
+	shipRot = 0;
+	turretRot = 0;
+	gunElev = 0;
+
+	vec3d_set(startingSpawn,0,0,0);
+	spawnShip(startingSpawn, 1);
+
     while (bGameLoopRunning)
     {
         for (i = 0; i < 100;i++)
@@ -115,6 +134,8 @@ int main(int argc, char *argv[])
                 {
                     bGameLoopRunning = 0;
                 }
+
+				/*
                 else if (e.key.keysym.sym == SDLK_SPACE)
                 {
                     cameraPosition.z++;
@@ -182,6 +203,40 @@ int main(int argc, char *argv[])
                 else if (e.key.keysym.sym == SDLK_DOWN)
                 {
                     cameraRotation.x -= 1;
+                }
+				*/
+
+				else if (e.key.keysym.sym == SDLK_w && shipVel < 100)
+                {
+                    shipVel += 25;
+                }
+				else if (e.key.keysym.sym == SDLK_s && shipVel > 50)
+                {
+                    shipVel -= 25;
+                }
+				else if (e.key.keysym.sym == SDLK_d && shipRot < 3)
+                {
+                    shipRot += 1;
+                }
+				else if (e.key.keysym.sym == SDLK_a && shipRot > -3)
+                {
+                    shipRot -= 1;
+                }
+				else if (e.key.keysym.sym == SDLK_UP && gunElev < 80)
+                {
+                    gunElev += 0.5;
+                }
+				else if (e.key.keysym.sym == SDLK_DOWN && gunElev > -5)
+                {
+                    gunElev -= 0.5;
+                }
+				else if (e.key.keysym.sym == SDLK_RIGHT && turretRot < 135)
+                {
+                    turretRot += 1;
+                }
+				else if (e.key.keysym.sym == SDLK_LEFT && turretRot > -135)
+                {
+                    turretRot -= 1;
                 }
             }
         }
