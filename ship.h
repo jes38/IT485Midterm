@@ -30,6 +30,7 @@ float gunElev;
 int numShips; //does not include player
 
 Ship *newShip();
+void initShips();
 void updateShipPos(Ship *ship);
 void componentInherit(Ship *ship);
 void updateAllShipPos();

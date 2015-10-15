@@ -1,4 +1,5 @@
 #include "body.h"
+#include "vector.h"
 
 
 void body_reset(Body *body)

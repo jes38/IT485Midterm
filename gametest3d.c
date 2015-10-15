@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
     model_init();
     obj_init();
     entity_init(255);
+	initShips();
     
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
@@ -113,15 +114,17 @@ int main(int argc, char *argv[])
 	turretRot = 0;
 	gunElev = 0;
 
-	vec3d_set(startingSpawn,0,0,0);
+	vec3d_set(startingSpawn,-10, 0, 0);
 	spawnShip(startingSpawn, 1);
 
     while (bGameLoopRunning)
     {
-        for (i = 0; i < 100;i++)
+		updateAllShipPos();
+		for (i = 0; i < 100;i++)
         {
-            space_do_step(space);
+			space_do_step(space);
         }
+		updateAllShipComp();
         while ( SDL_PollEvent(&e) ) 
         {
             if (e.type == SDL_QUIT)
@@ -135,7 +138,7 @@ int main(int argc, char *argv[])
                     bGameLoopRunning = 0;
                 }
 
-				/*
+				
                 else if (e.key.keysym.sym == SDLK_SPACE)
                 {
                     cameraPosition.z++;
@@ -204,16 +207,18 @@ int main(int argc, char *argv[])
                 {
                     cameraRotation.x -= 1;
                 }
-				*/
+				
 
-				else if (e.key.keysym.sym == SDLK_w && shipVel < 100)
+				
+				else if (e.key.keysym.sym == SDLK_y && shipVel < 0.4)
                 {
-                    shipVel += 25;
+                    shipVel += 0.1;
                 }
-				else if (e.key.keysym.sym == SDLK_s && shipVel > 50)
+				else if (e.key.keysym.sym == SDLK_h && shipVel > 0)
                 {
-                    shipVel -= 25;
+                    shipVel -= 0.1;
                 }
+				/*
 				else if (e.key.keysym.sym == SDLK_d && shipRot < 3)
                 {
                     shipRot += 1;
@@ -238,9 +243,10 @@ int main(int argc, char *argv[])
                 {
                     turretRot -= 1;
                 }
+				*/
             }
         }
-
+		 
         graphics3d_frame_begin();
         
         glPushMatrix();

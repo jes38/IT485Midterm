@@ -2,7 +2,7 @@
 #include "simple_logger.h"
 #include "shader.h"
 #include <GL/glu.h>
-
+#include <stdio.h>
 
 static SDL_GLContext __graphics3d_gl_context;
 static SDL_Window  * __graphics3d_window = NULL;
