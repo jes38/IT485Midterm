@@ -4,6 +4,7 @@
 #define maxShips	100
 
 #include "entity.h"
+#include "space.h"
 
 typedef struct Ship_S
 {
@@ -36,6 +37,6 @@ void componentInherit(Ship *ship);
 void updateAllShipPos();
 void updateAllShipComp();
 void takeShipInput(Ship *ship);
-Ship *spawnShip(Vec3D spawnPt, int shipType);
+Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType);
 
 #endif

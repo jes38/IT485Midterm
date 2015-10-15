@@ -6,6 +6,7 @@
 #include "vector.h"
 #include "collisions.h"
 #include "mgl_callback.h"
+#include "space.h"
 
 Ship *shipList = NULL;
 int shipAcc = 0;
@@ -66,18 +67,27 @@ void updateShipPos(Ship *ship)
 	ship->vel.y = (ship->vel.y + ship->acc.y);
 	ship->vel.z = (ship->vel.z + ship->acc.z);
 
-	ship->hull->body.velocity = ship->vel;
+	ship->hull->body.velocity.x = ship->vel.x;
+	ship->hull->body.velocity.y = ship->vel.y;
+	ship->hull->body.velocity.z = ship->vel.z;
+
+	slog("ship z position is:%f", ship->hull->body.position.z);
 }
 
 void componentInherit(Ship *ship) //all the bodies that the ship is composed of must have their positions updated before this is called
 {
-	ship->turret->body.position.x = ((ship->turrOff.x * cos(ship->hull->rotation.x * DEGTORAD)) + ship->hull->body.position.x);
-	ship->turret->body.position.y = ((ship->turrOff.y * cos(ship->hull->rotation.y * DEGTORAD)) + ship->hull->body.position.y);
-	ship->turret->body.position.z = ((ship->turrOff.z * sin(ship->hull->rotation.z * DEGTORAD)) + ship->hull->body.position.z);
+	float realGunRot;
 
-	ship->gun->body.position.x = ((ship->gunOff.x * cos(ship->turret->rotation.x * DEGTORAD)) + ship->turret->body.position.x);
-	ship->gun->body.position.y = ((ship->gunOff.y * sin(ship->turret->rotation.y * DEGTORAD)) + ship->turret->body.position.y);
-	ship->gun->body.position.z = ((ship->gunOff.z * sin(ship->turret->rotation.z * DEGTORAD)) + ship->turret->body.position.z);
+	if(turretRot < 0){realGunRot = turretRot + 360;}
+	else {realGunRot = turretRot;}
+	realGunRot += shipRot;
+	if (realGunRot >= 360){realGunRot -= 360;}
+
+	ship->turret->body.position.x = ((ship->turrOff.x * -sin(shipRot * DEGTORAD)) + ship->hull->body.position.x);
+	ship->turret->body.position.z = ((ship->turrOff.z * cos(shipRot * DEGTORAD)) + ship->hull->body.position.z);
+
+	ship->gun->body.position.x = ((ship->gunOff.x * -sin(realGunRot * DEGTORAD)) + ship->turret->body.position.x);
+	ship->gun->body.position.z = ((ship->gunOff.z * cos(realGunRot * DEGTORAD)) + ship->turret->body.position.z);
 }
 
 void updateAllShipPos()
@@ -107,12 +117,10 @@ void updateAllShipComp()
 
 void takeShipInput(Ship *ship)
 {
-	slog("ship vel is %s", shipVel);
-	ship->hull->body.velocity.x = ((shipVel * cos(ship->hull->rotation.x * DEGTORAD)) + ship->hull->body.velocity.x);
-	//ship->hull->body.velocity.y = ((shipVel * cos(ship->hull->rotation.y * DEGTORAD)) + ship->hull->body.position.y);
-	ship->hull->body.velocity.z = ((shipVel * sin(ship->hull->rotation.z * DEGTORAD)) + ship->hull->body.velocity.z);
+	ship->vel.x = (shipVel * -sin(shipRot * DEGTORAD));
+	ship->vel.z = (shipVel * cos(shipRot * DEGTORAD));
 
-
+	/*
 	//ROTATE THE SHIP
 	if(shipRot != 0)
 	{
@@ -120,7 +128,7 @@ void takeShipInput(Ship *ship)
 		if(ship->hull->rotation.y < 0){ship->hull->rotation.y += 360;}
 		if(ship->hull->rotation.y >= 360){ship->hull->rotation.y -= 360;}
 	}
-
+	*/
 
 	//SET GUN ELEVATION
 	/*
@@ -160,7 +168,7 @@ static void touch_callback(void *data, void *context) //put this here temporaril
     }
 }
 
-Ship *spawnShip(Vec3D spawnPt, int shipType)
+Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 {
 	Ship *ship;
 	ship = newShip();
@@ -182,7 +190,7 @@ Ship *spawnShip(Vec3D spawnPt, int shipType)
 	ship->hull->texture = LoadSprite("models/cube_text.png",1024,1024);
 	vec3d_cpy(ship->hull->body.position,spawnPt);
 	if(shipType == 1){
-		cube_set(ship->hull->body.bounds,-1,-1,-1,2,2,10);
+		cube_set(ship->hull->body.bounds,-1,-1,-5,2,2,10);
 		ship->hull->scale = vec3d(2,2,10);
 	}
 	mgl_callback_set(&ship->hull->body.touch,touch_callback,ship->hull);
@@ -191,7 +199,7 @@ Ship *spawnShip(Vec3D spawnPt, int shipType)
 	ship->turret->texture = LoadSprite("models/cube_text.png",1024,1024);
 	vec3d_cpy(ship->turret->body.position,spawnPt);
 	if(shipType == 1){
-		cube_set(ship->turret->body.bounds,-1,-1,-1,1,1.5,1);
+		cube_set(ship->turret->body.bounds,-0.5,-0.75,-0.5,1,1.5,1);
 		ship->turret->scale = vec3d(1,1.5,1);
 	}
 	mgl_callback_set(&ship->turret->body.touch,touch_callback,ship->turret);
@@ -200,19 +208,29 @@ Ship *spawnShip(Vec3D spawnPt, int shipType)
 	ship->gun->texture = LoadSprite("models/cube_text.png",1024,1024);
 	vec3d_cpy(ship->gun->body.position,spawnPt);
 	if(shipType == 1){
-		cube_set(ship->gun->body.bounds,-1,-1,-1,0.5,0.5,2);
-		ship->gun->scale = vec3d(0.5,0.5,2);
+		cube_set(ship->gun->body.bounds,0,0,0,0.1,0.1,0.1);
+		ship->gun->scale = vec3d(0.25,0.25,2);
 	}
 	mgl_callback_set(&ship->gun->body.touch,touch_callback,ship->gun);
 
+
+	space_add_body(space,&ship->hull->body);
+	space_add_body(space,&ship->turret->body);
+	space_add_body(space,&ship->gun->body);
+
 	if(shipType == 1)
 	{
-		ship->turrOff.x = 1;
-		ship->turrOff.y = 2;
-		ship->turrOff.z = 9;
+		ship->turrOff = vec3d(0,2.75,4);
+		//ship->turrOff.x = 1;
+		//ship->turrOff.y = 2;
+		//ship->turrOff.z = 9;
 
-		ship->gunOff.x = 0.5;
-		ship->gunOff.y = 1;
-		ship->gunOff.z = 0.5;
+		ship->gunOff = vec3d(0,0.25,1.5);
+		//ship->gunOff.x = 0.5;
+		//ship->gunOff.y = 1;
+		//ship->gunOff.z = 0.5;
 	}
+
+	ship->turret->body.position.y = 2.75;
+	ship->gun->body.position.y = 3;
 }

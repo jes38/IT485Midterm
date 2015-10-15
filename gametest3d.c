@@ -79,9 +79,6 @@ int main(int argc, char *argv[])
     SDL_Event e;
     Obj *bgobj;
     Sprite *bgtext;
-
-	//my variables
-	Vec3D startingSpawn;
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -114,8 +111,7 @@ int main(int argc, char *argv[])
 	turretRot = 0;
 	gunElev = 0;
 
-	vec3d_set(startingSpawn,-10, 0, 0);
-	spawnShip(startingSpawn, 1);
+	spawnShip(space, vec3d(-10,0,0), 1);
 
     while (bGameLoopRunning)
     {
@@ -214,19 +210,21 @@ int main(int argc, char *argv[])
                 {
                     shipVel += 0.1;
                 }
-				else if (e.key.keysym.sym == SDLK_h && shipVel > 0)
+				else if (e.key.keysym.sym == SDLK_h && shipVel > 0.05)
                 {
                     shipVel -= 0.1;
                 }
+				else if (e.key.keysym.sym == SDLK_j && shipRot < 1)
+                {
+                    shipRot += 0.5;
+					if(shipRot >= 360){shipRot -= 360;}
+                }
+				else if (e.key.keysym.sym == SDLK_g && shipRot > -1)
+                {
+                    shipRot -= 0.5;
+					if(shipRot < 0){shipRot += 360;}
+                }
 				/*
-				else if (e.key.keysym.sym == SDLK_d && shipRot < 3)
-                {
-                    shipRot += 1;
-                }
-				else if (e.key.keysym.sym == SDLK_a && shipRot > -3)
-                {
-                    shipRot -= 1;
-                }
 				else if (e.key.keysym.sym == SDLK_UP && gunElev < 80)
                 {
                     gunElev += 0.5;
