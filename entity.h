@@ -54,4 +54,8 @@ void entity_free(Entity *ent);
 
 int entity_is_entity(void *data);
 
+void applyGrav();
+
+void destEntID(int id);
+
 #endif

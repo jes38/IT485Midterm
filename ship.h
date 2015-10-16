@@ -29,6 +29,7 @@ float shipRot;
 float turretRot;
 float gunElev;
 int numShips; //does not include player
+float realTurrRot;
 
 Ship *newShip();
 void initShips();

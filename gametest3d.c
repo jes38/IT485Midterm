@@ -32,23 +32,9 @@
 #include "entity.h"
 #include "space.h"
 #include "ship.h"
+#include "weapon.h"
 
 void set_camera(Vec3D position, Vec3D rotation);
-
-void touch_callback(void *data, void *context)
-{
-    Entity *me,*other;
-    Body *obody;
-    if ((!data)||(!context))return;
-    me = (Entity *)data;
-    obody = (Body *)context;
-    if (entity_is_entity(obody->touch.data))
-    {
-        other = (Entity *)obody->touch.data;
-        slog("%s is ",other->name);
-    }
-    slog("touching me.... touching youuuuuuuu");
-}
 
 Entity *newCube(Vec3D position,const char *name)
 {
@@ -64,6 +50,7 @@ Entity *newCube(Vec3D position,const char *name)
     cube_set(ent->body.bounds,-1,-1,-1,2,2,2);
     sprintf(ent->name,"%s",name);
     mgl_callback_set(&ent->body.touch,touch_callback,ent);
+	ent->body.id = -3;
     return ent;
 }
 
@@ -100,7 +87,7 @@ int main(int argc, char *argv[])
     cube1 = newCube(vec3d(0,0,0),"Cubert");
     cube2 = newCube(vec3d(10,0,0),"Hobbes");
     
-    cube2->body.velocity.x = -0.1;
+    //cube1->body.velocity.x = 0.1;
     
     space = space_new();
     space_set_steps(space,100);
@@ -115,8 +102,10 @@ int main(int argc, char *argv[])
 	shipRot = 0;
 	turretRot = 0;
 	gunElev = 0;
+	realTurrRot = 0;
 
 	playerShip = spawnShip(space, vec3d(-10,0,0), 1);
+	spawnShip(space, vec3d(-12,0,50), 1);
 
     while (bGameLoopRunning)
     {
@@ -126,7 +115,7 @@ int main(int argc, char *argv[])
 			space_do_step(space);
         }
 		updateAllShipComp();
-
+		applyGrav();
 		if(specMode == 0)
 		{
 			cameraPosition.x = playerShip->hull->body.position.x;
@@ -256,6 +245,14 @@ int main(int argc, char *argv[])
 					if(specMode == 0){specMode = 1;}
 					else {specMode = 0;}
                 }
+				else if (e.key.keysym.sym == SDLK_p)
+                {
+					fireBullet(space, playerShip->gun->body.position, realTurrRot, gunElev, 0.5, -1);
+				}
+				else if (e.key.keysym.sym == SDLK_x)
+                {
+					fireBullet(space, playerShip->hull->body.position, shipRot, 0, 0, -2);
+				}
             }
         }
 		 

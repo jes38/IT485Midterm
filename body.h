@@ -13,6 +13,7 @@ typedef struct
     MglCallback touch;
     int  _needsBackoff;
     int  _done;
+	int id;
     Vec3D _stepOffVector;
 }Body;
 
