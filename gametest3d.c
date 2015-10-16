@@ -74,11 +74,15 @@ int main(int argc, char *argv[])
     Space *space;
     Entity *cube1,*cube2;
     char bGameLoopRunning = 1;
-    Vec3D cameraPosition = {0,-10,0.3};
-    Vec3D cameraRotation = {90,0,0};
+    Vec3D cameraPosition = {-10,3,0};
+    Vec3D cameraRotation = {180,0,180};
     SDL_Event e;
     Obj *bgobj;
     Sprite *bgtext;
+
+	//my variables
+	Ship *playerShip;
+	int specMode;
     
     init_logger("gametest3d.log");
     if (graphics3d_init(1024,768,1,"gametest3d",33) != 0)
@@ -105,13 +109,14 @@ int main(int argc, char *argv[])
     space_add_body(space,&cube2->body);
 
 	//my variables
+	specMode = 0;
 	numShips = 0;
 	shipVel = 0;
 	shipRot = 0;
 	turretRot = 0;
 	gunElev = 0;
 
-	spawnShip(space, vec3d(-10,0,0), 1);
+	playerShip = spawnShip(space, vec3d(-10,0,0), 1);
 
     while (bGameLoopRunning)
     {
@@ -121,6 +126,14 @@ int main(int argc, char *argv[])
 			space_do_step(space);
         }
 		updateAllShipComp();
+
+		if(specMode == 0)
+		{
+			cameraPosition.x = playerShip->hull->body.position.x;
+			cameraPosition.y = (playerShip->hull->body.position.y + 5);
+			cameraPosition.z = playerShip->hull->body.position.z;
+		}
+
         while ( SDL_PollEvent(&e) ) 
         {
             if (e.type == SDL_QUIT)
@@ -133,8 +146,6 @@ int main(int argc, char *argv[])
                 {
                     bGameLoopRunning = 0;
                 }
-
-				
                 else if (e.key.keysym.sym == SDLK_SPACE)
                 {
                     cameraPosition.z++;
@@ -189,11 +200,11 @@ int main(int argc, char *argv[])
                 }
                 else if (e.key.keysym.sym == SDLK_LEFT)
                 {
-                    cameraRotation.z += 1;
+                    cameraRotation.y -= 1;
                 }
                 else if (e.key.keysym.sym == SDLK_RIGHT)
                 {
-                    cameraRotation.z -= 1;
+                    cameraRotation.y += 1;
                 }
                 else if (e.key.keysym.sym == SDLK_UP)
                 {
@@ -214,34 +225,37 @@ int main(int argc, char *argv[])
                 {
                     shipVel -= 0.1;
                 }
-				else if (e.key.keysym.sym == SDLK_j && shipRot < 1)
+				else if (e.key.keysym.sym == SDLK_j)
                 {
                     shipRot += 0.5;
 					if(shipRot >= 360){shipRot -= 360;}
                 }
-				else if (e.key.keysym.sym == SDLK_g && shipRot > -1)
+				else if (e.key.keysym.sym == SDLK_g)
                 {
                     shipRot -= 0.5;
 					if(shipRot < 0){shipRot += 360;}
                 }
-				/*
-				else if (e.key.keysym.sym == SDLK_UP && gunElev < 80)
-                {
-                    gunElev += 0.5;
-                }
-				else if (e.key.keysym.sym == SDLK_DOWN && gunElev > -5)
-                {
-                    gunElev -= 0.5;
-                }
-				else if (e.key.keysym.sym == SDLK_RIGHT && turretRot < 135)
+				else if (e.key.keysym.sym == SDLK_m && turretRot < 135)
                 {
                     turretRot += 1;
                 }
-				else if (e.key.keysym.sym == SDLK_LEFT && turretRot > -135)
+				else if (e.key.keysym.sym == SDLK_b && turretRot > -135)
                 {
                     turretRot -= 1;
                 }
-				*/
+				else if (e.key.keysym.sym == SDLK_o && gunElev < 50)
+                {
+                    gunElev += 0.5;
+                }
+				else if (e.key.keysym.sym == SDLK_l && gunElev > -5)
+                {
+                    gunElev -= 0.5;
+                }
+				else if (e.key.keysym.sym == SDLK_q)
+                {
+					if(specMode == 0){specMode = 1;}
+					else {specMode = 0;}
+                }
             }
         }
 		 
@@ -252,7 +266,8 @@ int main(int argc, char *argv[])
             cameraPosition,
             cameraRotation);
         
-        entity_draw_all();  
+        entity_draw_all();
+		//updateAllShipModels();
         obj_draw(
             bgobj,
             vec3d(0,0,2),
