@@ -21,7 +21,7 @@ typedef struct Entity_S
     Sprite *texture;    /**<object texture*/
     Body body;
 
-	struct Entity_S *parent;
+	//struct Entity_S *parent; I may not need this after all that effort :P
 }Entity;
 
 /**

@@ -45,12 +45,6 @@ Ship *newShip()
 	ship->turret = entity_new();
 	ship->gun = entity_new();
 
-	/*
-	ship->turret->parent = ship->hull;
-	ship->gun->parent = ship->turret;
-	ship->hull->parent = NULL;
-	*/
-
 	return ship;
 }
 
@@ -102,13 +96,8 @@ void updateShipPos(Ship *ship)
 		takeShipInput(ship);
 	}
 
-	ship->vel.x = (ship->vel.x + ship->acc.x);
-	ship->vel.y = (ship->vel.y + ship->acc.y);
-	ship->vel.z = (ship->vel.z + ship->acc.z);
-
-	ship->hull->body.velocity.x = ship->vel.x;
-	ship->hull->body.velocity.y = ship->vel.y;
-	ship->hull->body.velocity.z = ship->vel.z;
+	vec3d_add(ship->vel,ship->vel,ship->acc);
+	vec3d_cpy(ship->hull->body.velocity, ship->vel);
 }
 
 void componentInherit(Ship *ship) //all the bodies that the ship is composed of must have their positions updated before this is called
@@ -182,8 +171,8 @@ void takeShipInput(Ship *ship)
 
 	ship->turret->rotation.y = realTurretRot;
 	ship->gun->rotation.y = realTurretRot;
-	// So apparently I need something called Oiler's formula :P
-	//SET GUN ELEVATION
+ 
+	//SET GUN ELEVATION ...So apparently I need something called Oiler's formula :P
 	ship->gun->rotation.x = (-gunElev * cos(-ship->turret->rotation.y * DEGTORAD));
 	//ship->gun->rotation.z = (-gunElev * sin(-ship->turret->rotation.y * DEGTORAD));
 	
@@ -201,6 +190,7 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 
 	ship->acc = vec3d(0,0,0);
 	ship->vel = vec3d(0,0,0);
+
 
 	//Hull
 	ship->hull->objModel = obj_load("models/cube.obj");
@@ -224,6 +214,7 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	mgl_callback_set(&ship->hull->body.touch,touch_callback,ship->hull);
 	ship->hull->body.id = ship->shipID;
 
+
 	//Turret
 	ship->turret->objModel = obj_load("models/cube.obj");
 	ship->turret->texture = LoadSprite("models/cube_text.png",1024,1024);
@@ -246,6 +237,7 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	mgl_callback_set(&ship->turret->body.touch,touch_callback,ship->turret);
 	ship->turret->body.id = ship->shipID;
 
+
 	//Gun
 	ship->gun->objModel = obj_load("models/cube.obj");
 	ship->gun->texture = LoadSprite("models/cube_text.png",1024,1024);
@@ -267,6 +259,7 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	}
 	mgl_callback_set(&ship->gun->body.touch,touch_callback,ship->gun);
 	ship->gun->body.id = ship->shipID;
+
 
 	space_add_body(space,&ship->hull->body);
 	space_add_body(space,&ship->turret->body);
