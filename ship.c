@@ -54,6 +54,45 @@ Ship *newShip()
 	return ship;
 }
 
+void freeShip(Ship *ship)
+{
+	if (!ship)
+    {
+        slog("passed a null ship");
+        return;
+    }
+    ship->inuse = 0;
+
+	entity_free(ship->hull);
+	entity_free(ship->turret);
+	entity_free(ship->gun);
+
+	ship->hull = NULL;
+	ship->turret = NULL;
+	ship->gun = NULL;
+}
+
+void freeAllShips(int notPlayer)
+{
+	int i;
+	if (!shipList)return;
+
+	if(notPlayer == 0)
+	{
+		for (i = 0;i < maxShips;i++)
+		{
+		    if (shipList[i].inuse){freeShip(&shipList[i]);}
+		}
+	}
+	else if(notPlayer == 1)
+	{
+		for (i = 0;i < maxShips;i++)
+		{
+			if (shipList[i].inuse && shipList[i].shipID != 0){freeShip(&shipList[i]);}
+		}
+	}
+}
+
 void updateShipPos(Ship *ship)
 {
 	if (!ship)return;
@@ -143,11 +182,11 @@ void takeShipInput(Ship *ship)
 
 	ship->turret->rotation.y = realTurretRot;
 	ship->gun->rotation.y = realTurretRot;
-	/* So apparently I need something called Oiler's formula :P
+	// So apparently I need something called Oiler's formula :P
 	//SET GUN ELEVATION
 	ship->gun->rotation.x = (-gunElev * cos(-ship->turret->rotation.y * DEGTORAD));
-	/ship->gun->rotation.z = (-gunElev * sin(-ship->turret->rotation.y * DEGTORAD));
-	*/
+	//ship->gun->rotation.z = (-gunElev * sin(-ship->turret->rotation.y * DEGTORAD));
+	
 }
 
 Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
@@ -163,27 +202,69 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	ship->acc = vec3d(0,0,0);
 	ship->vel = vec3d(0,0,0);
 
+	//Hull
 	ship->hull->objModel = obj_load("models/cube.obj");
 	ship->hull->texture = LoadSprite("models/cube_text.png",1024,1024);
 	vec3d_cpy(ship->hull->body.position,spawnPt);
-	cube_set(ship->hull->body.bounds,-2,-2,-10,4,4,20);
-	ship->hull->scale = vec3d(2,2,10);
+	if(shipType == 1)
+	{
+		cube_set(ship->hull->body.bounds,-2,-2,-10,4,4,20);
+		ship->hull->scale = vec3d(2,2,10);
+	}
+	if(shipType == 2)
+	{
+		cube_set(ship->hull->body.bounds,-2,-2,-10,4,4,20);
+		ship->hull->scale = vec3d(2,2,10);
+	}
+	if(shipType == 3)
+	{
+		cube_set(ship->hull->body.bounds,-2,-2,-2,4,4,4);
+		ship->hull->scale = vec3d(2,2,2);
+	}
 	mgl_callback_set(&ship->hull->body.touch,touch_callback,ship->hull);
 	ship->hull->body.id = ship->shipID;
 
+	//Turret
 	ship->turret->objModel = obj_load("models/cube.obj");
 	ship->turret->texture = LoadSprite("models/cube_text.png",1024,1024);
 	vec3d_cpy(ship->turret->body.position,spawnPt);
-	cube_set(ship->turret->body.bounds,-1,-1,-1.5,2,2,3);
-	ship->turret->scale = vec3d(1,1,1.5);
+	if(shipType == 1)
+	{
+		cube_set(ship->turret->body.bounds,-1,-1,-1.5,2,2,3);
+		ship->turret->scale = vec3d(1,1,1.5);
+	}
+	if(shipType == 2)
+	{
+		cube_set(ship->turret->body.bounds,-1,-1,-1.5,2,2,3);
+		ship->turret->scale = vec3d(1,1,1.5);
+	}
+	if(shipType == 3)
+	{
+		cube_set(ship->turret->body.bounds,-1,-1,-1.5,2,2,3);
+		ship->turret->scale = vec3d(1,1,1.5);
+	}
 	mgl_callback_set(&ship->turret->body.touch,touch_callback,ship->turret);
 	ship->turret->body.id = ship->shipID;
 
+	//Gun
 	ship->gun->objModel = obj_load("models/cube.obj");
 	ship->gun->texture = LoadSprite("models/cube_text.png",1024,1024);
 	vec3d_cpy(ship->gun->body.position,spawnPt);
-	cube_set(ship->gun->body.bounds,0,0,0,0.1,0.1,0.1);
-	ship->gun->scale = vec3d(0.25,0.25,2);
+	if(shipType == 1)
+	{
+		cube_set(ship->gun->body.bounds,0,0,0,0.1,0.1,0.1);
+		ship->gun->scale = vec3d(0.25,0.25,2);
+	}
+	if(shipType == 2)
+	{
+		cube_set(ship->gun->body.bounds,0,0,0,0.1,0.1,0.1);
+		ship->gun->scale = vec3d(0.25,0.25,0.25);
+	}
+	if(shipType == 3)
+	{
+		cube_set(ship->gun->body.bounds,0,0,0,0.1,0.1,0.1);
+		ship->gun->scale = vec3d(0.25,0.25,2);
+	}
 	mgl_callback_set(&ship->gun->body.touch,touch_callback,ship->gun);
 	ship->gun->body.id = ship->shipID;
 
@@ -195,13 +276,24 @@ Ship *spawnShip(Space *space, Vec3D spawnPt, int shipType)
 	ship->turret->uid = ship->shipID;
 	ship->gun->uid = ship->shipID;
 
-	slog("ship id is: %i", ship->hull->body.id);
-
-	if(ship->shipID == 0){sprintf(ship->hull->name,"%s","player");}
-
 	if(shipType == 1)
 	{
 		ship->turrOff = vec3d(0,2.75,5);
+		ship->gunOff = vec3d(0,0,1.25);
+		ship->turret->body.position.y = 2.75;
+		ship->gun->body.position.y = 3;
+	}
+	if(shipType == 2)
+	{
+		ship->turrOff = vec3d(0,2.75,0);
+		ship->gunOff = vec3d(0,0,0);
+		ship->hull->body.position.y = -10;
+		ship->turret->body.position.y = -7.25;
+		ship->gun->body.position.y = -7;
+	}
+	if(shipType == 3)
+	{
+		ship->turrOff = vec3d(0,2.75,0);
 		ship->gunOff = vec3d(0,0,1.25);
 		ship->turret->body.position.y = 2.75;
 		ship->gun->body.position.y = 3;

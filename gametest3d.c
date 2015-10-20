@@ -33,6 +33,7 @@
 #include "space.h"
 #include "ship.h"
 #include "weapon.h"
+#include "level.h"
 
 void set_camera(Vec3D position, Vec3D rotation);
 
@@ -84,8 +85,8 @@ int main(int argc, char *argv[])
     bgobj = obj_load("models/mountainvillage.obj");
     bgtext = LoadSprite("models/mountain_text.png",1024,1024);
     
-    cube1 = newCube(vec3d(0,0,0),"Cubert");
-    cube2 = newCube(vec3d(10,0,0),"Hobbes");
+    //cube1 = newCube(vec3d(0,0,0),"Cubert");
+    //cube2 = newCube(vec3d(10,0,0),"Hobbes");
     
     //cube1->body.velocity.x = 0.1;
     
@@ -105,7 +106,6 @@ int main(int argc, char *argv[])
 	realTurrRot = 0;
 
 	playerShip = spawnShip(space, vec3d(-10,0,0), 1);
-	spawnShip(space, vec3d(-12,0,50), 1);
 
     while (bGameLoopRunning)
     {
@@ -252,6 +252,18 @@ int main(int argc, char *argv[])
 				else if (e.key.keysym.sym == SDLK_x)
                 {
 					fireBullet(space, playerShip->hull->body.position, shipRot, 0, 0, -2);
+				}
+				else if (e.key.keysym.sym == SDLK_1)
+                {
+					startLevel(space, 1);
+				}
+				else if (e.key.keysym.sym == SDLK_2)
+                {
+					startLevel(space, 2);
+				}
+				else if (e.key.keysym.sym == SDLK_3)
+                {
+					startLevel(space, 3);
 				}
             }
         }

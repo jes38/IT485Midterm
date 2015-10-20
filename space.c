@@ -31,9 +31,14 @@ void touch_callback(void *data, void *context)
     if (entity_is_entity(obody->touch.data))
     {
         other = (Entity *)obody->touch.data;
-        slog("%s is ",other->name);
+        slog("%s is touching",me->name);
+		slog("%s",other->name);
+
+		if(me->uid == -1 || me->uid == -2)
+		{
+			entity_free(me);
+		}
     }
-    slog("touching me.... touching youuuuuuuu");
 }
 
 void space_set_steps(Space *space,int steps)
@@ -97,17 +102,18 @@ static void space_body_update(Space *space,Body *body)
         b.d = other->bounds.d;
         vec3d_add(b,b,other->bounds);
 
-		if(body->id == 0 && other->id == -1){continue;}
-		if(body->id == -1 && other->id == 0){continue;}
+		//collision exceptions
+		if(body->id == other->id){continue;}
 
-		if(body->id == 0 && other->id == -2){continue;}
-		if(body->id == -2 && other->id == 0){continue;}
+		if(body->id == 0 && other->id == -1){continue;}
+		else if(body->id == -1 && other->id == 0){continue;}
+		else if(body->id == 0 && other->id == -2){continue;}
+		else if(body->id == -2 && other->id == 0){continue;}
 
         if (cube_cube_intersection(a,b))
         {
             /*call touch functions*/
             /*back the fuck off*/
-			if(body->id == other->id){continue;}
             vec3d_cpy(body->_stepOffVector,stepOffVector);
             body->_done = 1;
             body->_needsBackoff = 1;
